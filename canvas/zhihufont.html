@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		* {
+			margin:0;
+			padding:0;
+		}
+		html,body {
+			height: 100%;
+			width: 100%;
+			position: relative;
+		}
+		#canvas {
+			height: 100%;
+			width:100%;
+			display:block;
+		}
+		.text{
+            width: 100%;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            line-height: 100%;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            position: absolute;
+            font-size: 50px;
+        }
+	</style>
+</head>
+<body>
+	<canvas id="canvas"></canvas>
+	<div class="text"> 仿知乎动态粒子效果背景</div>
+</body>
+<script type="text/javascript">
+	function Circle(x, y) {
+
+		/* 创建圆的对象
+			x 设置随即的xy坐标，r半径，_mx,_my移动的距离
+		*/
+		this.x = x;
+		this.y = y;
+		this.r = Math.random() * 10;
+		this._mx = Math.random();
+		this._my = Math.random();
+	}
+	Circle.prototype.drawCircle = function(ctx){
+		/*
+			ctx canvas对象
+		*/
+		ctx.beginPath();
+		ctx.arc(this.x,this.y,this.r,0,360)
+		ctx.closePath();
+		ctx.fillStyle = 'rgba(204, 204, 204, 0.3)';
+		ctx.fill()
+	}
+	Circle.prototype.drawLine = function(ctx,_circle) {
+		let dx = this.x - _circle.x;
+		let dy = this.y - _circle.y
+		let d = Math.sqrt(dx * dx + dy * dy)
+		if (d<150) {
+			ctx.beginPath();
+			ctx.moveTo(this.x,this.y);
+			ctx.lineTo(_circle.x,_circle.y)
+			ctx.closePath();
+			ctx.strokeStyle="rgba(204, 204, 204, 0.3)";
+			ctx.stroke();
+		}
+	}
+	Circle.prototype.move = function(w,h) {
+		this._mx = (this.x < w && this.x > 0) ? this._mx : (-this._mx);
+		this._my = (this.y < h && this.y > 0) ? this._my : (-this._my) 
+		this.x += this._mx / 2;
+		this.y += this._my / 2;
+	}
+
+	function Current_target(x,y){
+
+	}
+	Current_target.prototype = new Circle(0,0);
+	Current_target.prototype.drawCircle = function(ctx) {
+		ctx.beginPath();
+		ctx.arc(this.x,this.y,5,0,360);
+		ctx.closePath();
+		ctx.fillStyle = "rgba(255, 77, 54, 0.6)";
+		ctx.fill();
+	}
+	//Current_target.__proto__ = Circle.prototype;
+	 let current_target = new Current_target(0,0);
+	 console.log(current_target)
+	let circleArrs = []
+	let canvas = document.getElementById('canvas');
+	let ctx = canvas.getContext('2d')
+	let w = canvas.width = canvas.offsetWidth;
+	let h = canvas.height = canvas.offsetHeight;
+	let init = function(num){
+		for(let i = 0; i < num; i++) {
+			circleArrs.push(new Circle(Math.random()*w, Math.random()*h))
+		}
+		draw()
+	}
+	let draw = function() {
+		ctx.clearRect(0, 0, w, h)
+		for(let i = 0 ;i < circleArrs.length; i++) {
+			circleArrs[i].move(w,h)
+			circleArrs[i].drawCircle(ctx);
+			for(j = i+1; j<circleArrs.length;j++) {
+				circleArrs[i].drawLine(ctx,circleArrs[j])
+			}
+		}
+		if(current_target.x) {
+			current_target.drawCircle(ctx);
+			for(let l = 0; l < circleArrs.length; l ++) {
+				current_target.drawLine(ctx,circleArrs[l])
+			}
+		}
+		requestAnimationFrame(draw)
+	}
+	window.addEventListener('load',init(100))
+	window.onmousemove = function(e) {
+		e = e || window.event;
+		console.log(e)
+		current_target.x = e.clientX;
+		current_target.y = e.clientY;
+	}
+	window.onmouseout = function(){
+		current_target.x = null;
+		current_target.y = null;
+	}
+
+</script>
+</html>
