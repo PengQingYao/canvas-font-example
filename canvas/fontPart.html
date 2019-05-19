@@ -2,8 +2,70 @@
 <html>
 <head>
 	<title></title>
+	<style type="text/css">
+		html,body {
+			height: 80%;
+			width: 80%;
+		}
+		* {
+			margin:0;
+			padding:0;
+		}
+		#canvas {
+			width:100%;
+			height: 100%;
+			background: transparent;
+			/*display: block;*/
+		}
+
+	</style>
 </head>
 <body>
-
+	<canvas id="canvas"></canvas>
 </body>
+<script type="text/javascript">
+	// const size = 0.8;
+	// // 宽高分别达到屏幕0.8时的size
+	// const fSize = Math.min(height * size * 10 / lineHeight, width * size * 10 / measure.width);  // 10像素字体行高 lineHeight=7 magic
+	// ctx.font = `bold ${fSize}px Arial`;
+	let textAll = "大家晚上好"
+
+	let canvas = document.getElementById('canvas');
+	let ctx = canvas.getContext('2d');
+	let width = canvas.width = canvas.offsetWidth;
+	let height = canvas.height = canvas.offsetHeight;
+	ctx.font = "48px serif";
+	ctx.textBaseline = "hanging";
+	let text = ctx.measureText('textAll')
+	// ctx.strokeText('大家晚上好',0,100);
+	let left = (width - text.width) /2
+	let bottom = (height - 48) / 2
+	// console.log(ctx.font,left, bottom)
+	// ctx.fillText(textAll,left,bottom);
+
+	let geometry = []
+	Object.values(textAll).map((item,index) => {
+		let points = [];
+		// ctx.clearRect(0, 0, width, height);
+		ctx.fillText(item, left, bottom);
+		left += ctx.measureText(item).width;
+		const data = ctx.getImageData(0,0,width, height);
+		console.log(data.data[1])
+		for(let i = 0, max = data.height * data.width; i < max; i ++) {
+			if(data.data[i * 4 + 3]) {
+				points.push({
+					x: (i % data.width);
+					y: (i / data.width);
+				})
+			}
+		}
+		geometry.push(points)
+	})
+
+</script>
 </html>
+
+
+
+
+
